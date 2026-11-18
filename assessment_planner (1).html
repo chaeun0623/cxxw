@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#4058a5">
+<title>수행평가 일정 관리 프로그램</title>
+<style>
+* { box-sizing: border-box; }
+body {
+    font-family: Arial, sans-serif;
+    background: #f3f5fa;
+    margin: 0;
+    padding: 24px 12px;
+    color: #263248;
+}
+.container {
+    max-width: 750px;
+    margin: auto;
+    background: white;
+    padding: 22px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px #00000012;
+}
+h1 { text-align: center; color: #4058a5; font-size: 25px; }
+.description { text-align: center; color: #777; font-size: 14px; margin-bottom: 25px; }
+.input-area { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.input-group { display: flex; flex-direction: column; gap: 6px; }
+label { font-size: 14px; font-weight: bold; }
+input, select {
+    width: 100%; padding: 12px; border: 1px solid #ddd;
+    border-radius: 7px; font-size: 16px; background: white;
+}
+.full { grid-column: span 2; }
+button {
+    border: none; padding: 12px; border-radius: 7px;
+    cursor: pointer; font-size: 14px; font-weight: bold;
+}
+.add-btn { background: #4058a5; color: white; margin-top: 15px; width: 100%; }
+.recommend-btn { background: #253d80; color: white; width: 100%; margin-top: 10px; }
+.delete-btn { background: #ffe5e5; color: #c44; padding: 8px 10px; flex-shrink: 0; }
+.result { margin-top: 28px; }
+.task {
+    background: #f5f7fc; border-radius: 9px; padding: 14px;
+    margin: 10px 0; display: flex; justify-content: space-between;
+    align-items: center; gap: 10px;
+}
+.task strong { color: #354d94; }
+.task p { margin: 6px 0; font-size: 13px; color: #666; }
+.rank { color: #4058a5; font-weight: bold; }
+.summary { background: #edf1ff; padding: 15px; border-radius: 9px; margin-top: 20px; line-height: 1.8; }
+.algorithm { background: #f5f7fc; padding: 18px; border-radius: 10px; line-height: 1.8; font-size: 14px; }
+.algorithm h4 { color: #4058a5; margin-bottom: 5px; }
+.algorithm ol { padding-left: 22px; }
+.note { color: #777; font-size: 12px; line-height: 1.6; margin-top: 12px; }
+@media(max-width: 450px) {
+    body { padding: 12px 8px; }
+    .container { padding: 17px; }
+    h1 { font-size: 22px; }
+    .input-area { grid-template-columns: 1fr; }
+    .full { grid-column: span 1; }
+}
+</style>
+</head>
+<body>
+<div class="container">
+    <h1>수행평가 일정 관리</h1>
+    <p class="description">그리디 알고리즘으로 효율적인 수행평가 준비 순서를 추천합니다.</p>
+
+    <h3>수행평가 정보 입력</h3>
+    <div class="input-area">
+        <div class="input-group full">
+            <label for="name">수행평가 이름</label>
+            <input type="text" id="name" placeholder="예: 국어 발표">
+        </div>
+        <div class="input-group">
+            <label for="deadline">마감일까지 남은 날짜</label>
+            <input type="number" id="deadline" min="0" step="1" placeholder="예: 3">
+        </div>
+        <div class="input-group">
+            <label for="hours">예상 준비 시간</label>
+            <input type="number" id="hours" min="0.1" step="0.1" placeholder="예: 2">
+        </div>
+        <div class="input-group full">
+            <label for="importance">중요도 (1~5점)</label>
+            <select id="importance">
+                <option value="1">1점 - 낮음</option>
+                <option value="2">2점</option>
+                <option value="3" selected>3점 - 보통</option>
+                <option value="4">4점</option>
+                <option value="5">5점 - 높음</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="add-btn" id="addButton">+ 수행평가 추가</button>
+
+    <div class="result">
+        <h3>등록된 수행평가</h3>
+        <div id="taskList">등록된 수행평가가 없습니다.</div>
+    </div>
+
+    <button class="recommend-btn" id="recommendButton">그리디 알고리즘으로 준비 순서 결정하기</button>
+
+    <div class="result">
+        <h3>추천 준비 순서</h3>
+        <div id="recommendList">수행평가를 추가한 후 버튼을 눌러주세요.</div>
+        <div id="summary"></div>
+    </div>
+
+    <div class="result">
+        <h3>그리디 알고리즘 원리</h3>
+        <div class="algorithm">
+            <h4>1. 그리디 알고리즘이란?</h4>
+            매 순간 주어진 상황에서 가장 좋은 선택이라고 판단되는 것을 선택하는 알고리즘이다.
+            <h4>2. 프로그램 적용 원리</h4>
+            <ol>
+                <li>각 수행평가의 마감일, 준비 시간, 중요도를 입력받는다.</li>
+                <li>입력된 정보를 바탕으로 과제별 우선순위 점수를 계산한다.</li>
+                <li>우선순위 점수가 가장 높은 과제를 먼저 선택한다.</li>
+                <li>모든 과제를 점수가 높은 순서대로 정렬한다.</li>
+                <li>최종 준비 순서를 화면에 출력한다.</li>
+            </ol>
+            <h4>3. 우선순위 계산 공식</h4>
+            <p style="text-align:center;font-weight:bold;">(중요도 × 예상 준비 시간) ÷ (남은 날짜 + 1)</p>
+            <h4>4. 핵심 원리</h4>
+            현재 가장 높은 우선순위의 과제를 선택하는 과정을 반복하여 수행평가 준비 순서를 결정한다.
+        </div>
+        <p class="note">※ 우선순위 점수에 따른 추천이며, 모든 상황에서 전체 일정의 최적해를 보장하지는 않는다.</p>
+    </div>
+    <p class="note">입력한 일정은 이 기기의 브라우저에 자동 저장됩니다. 같은 기기와 브라우저에서 다시 열면 유지됩니다.</p>
+</div>
+
+<script>
+const STORAGE_KEY = "assessmentTasks_v1";
+let tasks = loadTasks();
+
+function loadTasks() {
+    try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function saveTasks() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+}
+
+function calculatePriority(task) {
+    return task.importance * task.hours / (task.deadline + 1);
+}
+
+function addTask() {
+    const name = document.getElementById("name").value.trim();
+    const deadlineValue = document.getElementById("deadline").value;
+    const hoursValue = document.getElementById("hours").value;
+    const importance = Number(document.getElementById("importance").value);
+
+    if (!name || deadlineValue === "" || hoursValue === "") {
+        alert("모든 정보를 입력해주세요.");
+        return;
+    }
+
+    const deadline = Number(deadlineValue);
+    const hours = Number(hoursValue);
+
+    if (!Number.isInteger(deadline) || deadline < 0 ||
+        !Number.isFinite(hours) || hours <= 0) {
+        alert("날짜와 준비 시간을 올바르게 입력해주세요.");
+        return;
+    }
+
+    tasks.push({ name, deadline, hours, importance });
+    saveTasks();
+
+    document.getElementById("name").value = "";
+    document.getElementById("deadline").value = "";
+    document.getElementById("hours").value = "";
+
+    showTasks();
+    resetRecommendation();
+}
+
+function showTasks() {
+    const list = document.getElementById("taskList");
+    list.replaceChildren();
+
+    if (tasks.length === 0) {
+        list.textContent = "등록된 수행평가가 없습니다.";
+        return;
+    }
+
+    tasks.forEach((task, index) => {
+        const div = document.createElement("div");
+        div.className = "task";
+
+        const info = document.createElement("div");
+        const title = document.createElement("strong");
+        title.textContent = task.name;
+
+        const detail = document.createElement("p");
+        detail.textContent = `마감까지 ${task.deadline}일 | 준비 시간 ${task.hours}시간 | 중요도 ${task.importance}점`;
+
+        info.append(title, detail);
+
+        const button = document.createElement("button");
+        button.className = "delete-btn";
+        button.textContent = "삭제";
+        button.addEventListener("click", () => deleteTask(index));
+
+        div.append(info, button);
+        list.append(div);
+    });
+}
+
+function deleteTask(index) {
+    tasks.splice(index, 1);
+    saveTasks();
+    showTasks();
+    resetRecommendation();
+}
+
+function resetRecommendation() {
+    document.getElementById("recommendList").textContent =
+        "목록이 변경되었습니다. 다시 추천받아주세요.";
+    document.getElementById("summary").replaceChildren();
+}
+
+function recommend() {
+    if (tasks.length === 0) {
+        alert("수행평가를 먼저 추가해주세요.");
+        return;
+    }
+
+    // 그리디 선택: 현재 우선순위가 가장 높은 과제를 먼저 배치
+    const sortedTasks = [...tasks].sort(
+        (a, b) => calculatePriority(b) - calculatePriority(a)
+    );
+
+    const result = document.getElementById("recommendList");
+    result.replaceChildren();
+
+    sortedTasks.forEach((task, index) => {
+        const div = document.createElement("div");
+        div.className = "task";
+
+        const info = document.createElement("div");
+        const rank = document.createElement("strong");
+        rank.className = "rank";
+        rank.textContent = `${index + 1}순위. ${task.name}`;
+
+        const detail = document.createElement("p");
+        detail.textContent = `마감까지 ${task.deadline}일 | 준비 ${task.hours}시간 | 중요도 ${task.importance}점`;
+
+        const score = document.createElement("p");
+        score.textContent = `우선순위 점수: ${calculatePriority(task).toFixed(2)}`;
+
+        info.append(rank, detail, score);
+        div.append(info);
+        result.append(div);
+    });
+
+    const totalHours = sortedTasks.reduce((sum, task) => sum + task.hours, 0);
+    const summary = document.getElementById("summary");
+    const box = document.createElement("div");
+    box.className = "summary";
+    box.append(
+        document.createElement("strong"),
+        document.createElement("br")
+    );
+    box.firstChild.textContent = "일정 관리 결과";
+
+    const details = document.createElement("span");
+    details.textContent =
+        `전체 수행평가: ${tasks.length}개\n총 예상 준비 시간: ${totalHours}시간\n가장 먼저 준비할 과제: ${sortedTasks[0].name}`;
+    details.style.whiteSpace = "pre-line";
+    box.append(details);
+    summary.replaceChildren(box);
+}
+
+document.getElementById("addButton").addEventListener("click", addTask);
+document.getElementById("recommendButton").addEventListener("click", recommend);
+
+showTasks();
+</script>
+</body>
+</html>
